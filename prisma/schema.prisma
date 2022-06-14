@@ -1,0 +1,81 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id                 String @id @default(uuid())
+  title              String
+  coverImageUrl      String
+  description        String
+  year               Int
+  imdbScore        Int
+  trailerYoutubeUrl  String
+  gameplayYoutubeUrl String
+
+  favoriteGames FavoriteGames[]
+
+
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  genres   Genre[]
+  profiles Profile[]
+
+  @@map("game")
+}
+
+model Genre {
+  name String @id @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  games Game[]
+  @@map("genre")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  password String
+  cpf      String  @unique
+  isAdmin  Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  profile Profile[]
+  @@map("user")
+}
+
+model Profile {
+  id       String @id @default(uuid())
+  title    String
+  imageUrl String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String @map("user_id")
+
+  favoriteGames FavoriteGames?
+
+  games Game[]
+
+
+  @@map("profile")
+}
+
+model FavoriteGames {
+  id String @id @default(uuid())
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId String  @map("profile_id") @unique
+
+  games Game[]
+}
